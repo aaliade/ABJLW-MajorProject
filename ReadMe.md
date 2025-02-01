@@ -27,4 +27,4 @@ npm i dotenv
 * [x] Rewards
 * [x] Collected Waste
 * [x] Notification
-_ Stored in src/utils folder _
+_Stored in src/utils folder_
