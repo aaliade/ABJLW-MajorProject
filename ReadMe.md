@@ -20,11 +20,17 @@ npm i drizzle-orm @neondatabase/serverless dotenv
 npm i -D drizzle-kit tsx
 npm i dotenv
 ```
+
+### Camera Setup
+```
+npm install react-webcam
+```
+
 #### Schema
+_Stored in src/utils folder_
 
 * [x] Users
 * [x] Reports
 * [x] Rewards
 * [x] Collected Waste
 * [x] Notification
-_Stored in src/utils folder_

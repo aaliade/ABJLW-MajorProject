@@ -12,11 +12,13 @@
   },
   "dependencies": {
     "@neondatabase/serverless": "^0.10.4",
+    "camerakit": "^0.4.1",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.39.1",
     "next": "15.1.6",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-webcam": "^7.2.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
