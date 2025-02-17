@@ -1,4 +1,4 @@
-import { integer, varchar, pgTable, serial, text, timestamp, jsonb, boolean } from "drizzle-orm/pg-core";
+import { integer, varchar, pgTable, serial, text, timestamp, jsonb, boolean, doublePrecision } from "drizzle-orm/pg-core";
 
 // Users table
 export const Users = pgTable("users", {
@@ -12,7 +12,9 @@ export const Users = pgTable("users", {
 export const Reports = pgTable("reports", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => Users.id).notNull(),
-  location: text("location").notNull(),
+  address: text("address").notNull(),
+  latitude: doublePrecision("latitude").notNull(),
+  longitude: doublePrecision("longitude").notNull(),
   wasteType: varchar("waste_type", { length: 255 }).notNull(),
   amount: varchar("amount", { length: 255 }).notNull(),
   imageUrl: text("image_url"),
@@ -61,6 +63,7 @@ export const Transactions = pgTable("transactions", {
   userId: integer("user_id").references(() => Users.id).notNull(),
   type: varchar("type", { length: 20 }).notNull(), // 'earned' or 'redeemed'
   amount: integer("amount").notNull(),
+  status: varchar("status", { length: 20 }).notNull().default("pending"),
   description: text("description").notNull(),
   date: timestamp("date").defaultNow().notNull(),
 });
