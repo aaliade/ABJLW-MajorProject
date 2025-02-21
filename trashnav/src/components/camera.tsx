@@ -12,10 +12,27 @@ const Camera: React.FC = () => {
   };
 
   // Capture image function
+  //const capture = useCallback(() => {
+  //  const imageSrc = webcamRef.current?.getScreenshot();
+  //  console.log("Captured Image:", imageSrc);
+  //}, []);
+
   const capture = useCallback(() => {
     const imageSrc = webcamRef.current?.getScreenshot();
-    console.log("Captured Image:", imageSrc);
+    if (imageSrc) {
+      downloadImage(imageSrc);
+    }
   }, []);
+
+  // Function to download the image
+  const downloadImage = (imageSrc: string) => {
+    const link = document.createElement("a");
+    link.href = imageSrc;
+    link.download = `screenshot_${Date.now()}.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div style={{ textAlign: "center" }}>
