@@ -18,6 +18,7 @@ node -v
 
 ### Optimizing garbage collection routes using user-generated data.
 
+
 ---
 
 ## 📌 Table of Contents
