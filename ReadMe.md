@@ -14,7 +14,7 @@ _Node Js version should be above 14.6.0_
 node -v
 ```
 
-# Garbage Optimization Web Application 🗑️🚛
+# TRASHNAV 🗑️🚛
 
 ### Optimizing garbage collection routes using user-generated data.
 
