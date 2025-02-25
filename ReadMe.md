@@ -1,19 +1,3 @@
-
-
-
-### Node Js Setup
-
-Linux commands to setup node:
-```
-sudo apt install nodejs
-sudo apt install npm
-
-```
-_Node Js version should be above 14.6.0_
-```
-node -v
-```
-
 # TRASHNAV 🗑️🚛
 
 ### Optimizing garbage collection routes using user-generated data.
@@ -82,13 +66,13 @@ We use **cookies** for anonymous user tracking and store data in a **Neon databa
 ## ⚙️ Setup & Installation
 ### 1️⃣ Clone the repository
 ```bash
-git clone https://github.com/your-repo.git
-cd your-repo
+git clone https://github.com/aaliade/ABJLW-MajorProject.git
+cd ABJLW-MajorProject
 ```
 
 ### 2️⃣ Install dependencies
 ```bash
-pnpm install
+npm install
 ```
 
 ### 3️⃣ Setup environment variables
@@ -100,7 +84,7 @@ CLOUDINARY_API_KEY=your_cloudinary_key
 
 ### 4️⃣ Run the development server
 ```bash
-pnpm dev
+npm run dev
 ```
 
 ---
