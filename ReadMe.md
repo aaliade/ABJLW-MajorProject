@@ -64,6 +64,14 @@ We use **cookies** for anonymous user tracking and store data in a **Neon databa
 ---
 
 ## ⚙️ Setup & Installation
+
+
+### Dependencies
+```
+sudo apt install nodejs
+sudo apt install npm
+```
+
 ### 1️⃣ Clone the repository
 ```bash
 git clone https://github.com/aaliade/ABJLW-MajorProject.git
