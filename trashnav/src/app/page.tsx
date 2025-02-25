@@ -1,15 +1,22 @@
-"use client"; // Ensures it's a client component
+import Link from 'next/link'
+ 
 
-import React, { useRef, useCallback } from "react";
-import Webcam from "react-webcam";
 
-import Camera from "@/components/camera";
+
 
 export default function Home() {
   return (
-    <div style={{ textAlign: "center" }}>
-      <div>Hello</div>
-      <Camera />
-    </div>
+
+  
+
+
+
+//    <div style={{ textAlign: "center" }}>
+
+  //    <div>This will be a landing page showing about us and just plain detail about what the application is about</div>
+     // <Link href="/auth">Login/Register</Link>
+    //</div>
+  
+
   );
 }
