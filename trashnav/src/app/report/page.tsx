@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth/next"
 import UserCard from "../components/UserCard"
 import { redirect } from "next/navigation"
 import Webcam from "react-webcam";
-import Camera from "@/components/camera";
+import Camera from "@/app/components/camera";
 
 
 export default async function ReportPage() {
