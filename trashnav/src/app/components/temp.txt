@@ -1,0 +1,92 @@
+"use client";
+
+
+import React, { useRef, useCallback, useEffect, useState } from "react";
+import Webcam from "react-webcam";
+import {GoogleGenerativeAi} from "@google/generative-ai" 
+import {toast} from 'react-hot-toast'
+
+
+const geminiApiKey = process.env.GEMINI_API_KEY
+
+
+//Send Image to local localStorage
+//// Retrieve image
+//send to ai 
+//recieve test
+
+
+const Camera: React.FC = () => {
+const webcamRef = useRef<Webcam>(null);
+
+  // Video constraints to force back camera
+  const videoConstraints = {
+    facingMode: "environment",
+  };
+
+
+  
+const capture = useCallback(() => {
+  const imageSrc = webcamRef.current?.getScreenshot();
+  if (imageSrc) {
+    localStorage.setItem("capturedImage", imageSrc);
+    alert("Image saved!");
+  }
+}, []);
+
+
+/**
+  const capture = useCallback(() => {
+    const imageSrc = webcamRef.current?.getScreenshot();
+    if (imageSrc) {
+      downloadImage(imageSrc);
+    }
+  }, []); */
+
+  // Function to download the image
+  /**const downloadImage = (imageSrc: string) => {
+    const link = document.createElement("a");
+    link.href = imageSrc;
+    link.download = `screenshot_${Date.now()}.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }; */
+
+  /**
+const downloadImage = () => {
+  const imageSrc = localStorage.getItem("capturedImage");
+  if (!imageSrc) {
+    alert("No image found!");
+    return;
+  }
+
+  const link = document.createElement("a");
+  link.href = imageSrc;
+  link.download = `captured_image_${Date.now()}.jpg`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};*/
+
+
+  return (
+    <div style={{ textAlign: "center" }}>
+      <h1>Webcam Feed</h1>
+      <Webcam
+        ref={webcamRef}
+        videoConstraints={videoConstraints}
+        mirrored={false}
+        screenshotFormat="image/jpeg"
+        style={{ width: "100%", height: "auto" }}
+      />
+      <button onClick={capture} style={{ marginTop: "10px", padding: "10px" }}>
+        Capture Photo
+      </button>
+      <button onClick={downloadImage} style={{ marginTop: "10px", padding: "10px" }}>Send To AI</button>
+    </div>
+  );
+};
+
+export default Camera;
+

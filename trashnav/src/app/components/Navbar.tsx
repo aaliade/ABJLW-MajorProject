@@ -8,6 +8,8 @@ export default function Navbar() {
                 <li><Link href="/api/auth/signin">Sign In</Link></li>
                 <li><Link href="/api/auth/signout">Sign Out</Link></li>
                 <li><Link href="/report">Report</Link></li>
+                <li><Link href="/map">Map</Link></li>
+
             </ul>
         </nav>
     )
