@@ -1,13 +1,20 @@
 "use client";
 
-import React, { useRef, useCallback, useState } from "react";
+import React, { useRef, useCallback, useState, useEffect } from "react";
 import Webcam from "react-webcam";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { toast } from "react-hot-toast";
 
+
+
+  
+
+
 const Camera: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const webcamRef = useRef<Webcam>(null);
+  const [location, setLocation] = useState(null);
+  const [error, setError] = useState(null);
 
   // Video constraints to force back camera
   const videoConstraints = {
@@ -16,6 +23,34 @@ const Camera: React.FC = () => {
 
   // Capture function to take a screenshot
   const capture = useCallback(() => {
+
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            accuracy: position.coords.accuracy, // Meters
+          });
+         
+          
+        },
+        (error) => {
+          setError(error.message);
+        },
+        {
+          enableHighAccuracy: true, // Ensures precise location
+          timeout: 10000, // Max wait time (10 seconds)
+          maximumAge: 0, // Prevent cached values
+        }
+      );
+    } else {
+      setError("Geolocation is not supported by your browser.");
+    }
+
+        console.log("Latitude:", location.latitude);
+         console.log("Latitude:", location.longitude);
+
     const imageSrc = webcamRef.current?.getScreenshot();
     if (imageSrc) {
       localStorage.setItem("capturedImage", imageSrc);
@@ -64,34 +99,6 @@ const identifyImage = async () => {
 
 
 
-/**
-  // Send the captured image to AI for processing
-  const identifyImage = async () => {
-    setLoading(true);
-    const genAI = new GoogleGenerativeAI("AIzaSyBszO5o1feXKzREDORVafBpfbBG-i2Jqiw");
-    //const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-    try {
-      const imageSrc = localStorage.getItem("capturedImage");
-      if (!imageSrc) {
-        alert("No image found in local storage!");
-        return;
-      } else {
-        const result = await model.generateContent([
-          "Identify this image and provide its name and important information including a brief explanation about that image.",
-          imageSrc,
-        ]);
-        const response = await result.response;
-        console.log(response); // Log the response to see what you get
-      }
-    } catch (error) {
-      console.error("Error identifying image:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-*/
   return (
     <div style={{ textAlign: "center" }}>
       <h1>Webcam Feed</h1>
