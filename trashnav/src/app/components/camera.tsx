@@ -85,8 +85,9 @@ const identifyImage = async () => {
 
     // Send request with both text and image
     const result = await model.generateContent([
-      { text: "Identify this image and provide its name and important information including a brief explanation." },
-      image, // Correctly formatted image input
+      { 
+        text: "For garbage, determine the current fill level by examining visible contents and container capacity. Classify the fill level into one of three categories: - Minimum: Container is 0-30% full (mostly empty, minimal waste visible) - Medium: Container is 31-70% full (partially filled, contents visible but not overflowing) - Maximum: Container is 71-100% full (nearly full or overflowing, urgent collection needed)" },
+        image, // Correctly formatted image input
     ]);
 
     const response = await result.response;
