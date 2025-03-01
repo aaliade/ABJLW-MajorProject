@@ -47,10 +47,6 @@ const Camera: React.FC = () => {
     } else {
       setError("Geolocation is not supported by your browser.");
     }
-
-        console.log("Latitude:", location.latitude);
-         console.log("Latitude:", location.longitude);
-
     const imageSrc = webcamRef.current?.getScreenshot();
     if (imageSrc) {
       localStorage.setItem("capturedImage", imageSrc);
@@ -58,6 +54,12 @@ const Camera: React.FC = () => {
     }
   }, []);
 
+ useEffect(() => {
+    if (location) {
+      console.log("Latitude:", location.latitude);
+      console.log("Longitude:", location.longitude);
+    }
+  }, [location]);
 
 
 const identifyImage = async () => {
