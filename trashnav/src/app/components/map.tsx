@@ -19,28 +19,172 @@ type DirectionsResult = google.maps.DirectionsResult;
 type MapOptions = google.maps.MapOptions;
 
 export default function Map() {
-
+  const [office, setOffice] = useState<LatLngLiteral>();
+  const [directions, setDirections] = useState<DirectionsResult>();
+ 
   const center = useMemo<LatLngLiteral>(
-    () => ({ lat: 18.25000000 , lng: -77.50000000 }),
+    () => ({ lat: 17.9833 , lng: -76.8000}),
+    []
+  );
+  const darkModeStyles = [
+    { elementType: "geometry", stylers: [{ color: "#212121" }] },
+    { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+    { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
+    { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
+    {
+      featureType: "administrative",
+      elementType: "geometry",
+      stylers: [{ color: "#757575" }],
+    },
+    {
+      featureType: "administrative.country",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#9e9e9e" }],
+    },
+    {
+      featureType: "landscape",
+      elementType: "geometry",
+      stylers: [{ color: "#2c2c2c" }],
+    },
+    {
+      featureType: "poi",
+      elementType: "geometry",
+      stylers: [{ color: "#303030" }],
+    },
+    {
+      featureType: "road",
+      elementType: "geometry",
+      stylers: [{ color: "#383838" }],
+    },
+    {
+      featureType: "road",
+      elementType: "geometry.stroke",
+      stylers: [{ color: "#212121" }],
+    },
+    {
+      featureType: "road",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#8a8a8a" }],
+    },
+    {
+      featureType: "transit",
+      elementType: "geometry",
+      stylers: [{ color: "#2c2c2c" }],
+    },
+    {
+      featureType: "water",
+      elementType: "geometry",
+      stylers: [{ color: "#000000" }],
+    },
+    {
+      featureType: "water",
+      elementType: "labels.text.fill",
+      stylers: [{ color: "#3d3d3d" }],
+    },
+  ];
+  const options = useMemo<MapOptions>(
+    () => ({
+      mapId: "ca15b6fb8fe984f7",
+      disableDefaultUI: true,
+      clickableIcons: false,
+      styles: darkModeStyles,
+    }),
     []
   );
 
+  const mapRef = useRef<google.maps.Map | null>(null);
+
+  const onLoad = useCallback((map: google.maps.Map | null) => {
+    mapRef.current = map;
+  }, []);
+
+  const houses = useMemo(() => generateHouses(center), [center]);
+
+
+  const fetchDirections = (house: LatLngLiteral) => {
+    if (!office) return;
+
+    const service = new google.maps.DirectionsService();
+    service.route(
+      {
+        origin: house,
+        destination: office,
+        travelMode: google.maps.TravelMode.DRIVING,
+      },
+      (result, status) => {
+        if (status === "OK" && result) {
+          setDirections(result);
+        }
+      }
+    );
+  };
+
   return (
-  <div className = "container">
-    <div className = "controls">
-      <h1>Map of Area In Kingston</h1>
-    </div>
-    <div className = "map">
-      <GoogleMap
-          zoom={10}
+    <div className="container">
+      <div className="controls">
+        <h1>Commute?</h1>
+        <Places
+          setOffice={(position) => {
+            setOffice(position);
+            mapRef.current?.panTo(position);
+          }}
+        />
+        {!office && <p>Enter the address of your office.</p>}
+        {directions && <Distance leg={directions.routes[0].legs[0]} />}
+      </div>
+      <div className="map">
+        <GoogleMap
+          zoom={14}
           center={center}
           mapContainerClassName="map-container"
-        />
+          options={options}
+          onLoad={onLoad}
+        >
+          {directions && (
+            <DirectionsRenderer
+              directions={directions}
+              options={{
+                polylineOptions: {
+                  zIndex: 50,
+                  strokeColor: "#1976D2",
+                  strokeWeight: 5,
+                },
+              }}
+            />
+          )}
+
+          {office && (
+            <>
+              <Marker
+                position={office}
+                icon="https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png"
+              />
+
+              <MarkerClusterer>
+                {(clusterer) =>
+                  houses.map((house) => (
+                    <Marker
+                      key={house.lat}
+                      position={house}
+                      clusterer={clusterer}
+                      onClick={() => {
+                        fetchDirections(house);
+                      }}
+                    />
+                  ))
+                }
+                
+              </MarkerClusterer>
+
+              <Circle center={office} radius={15000} options={closeOptions} />
+              <Circle center={office} radius={30000} options={middleOptions} />
+              <Circle center={office} radius={45000} options={farOptions} />
+            </>
+          )}
+        </GoogleMap>
+      </div>
     </div>
-
-  </div>
-  );  
-
+  );
 }
 
 const defaultOptions = {

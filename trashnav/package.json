@@ -13,9 +13,12 @@
     "db:studio": "npx drizzle-kit studio"
   },
   "dependencies": {
+    "20": "^3.1.9",
     "@google/generative-ai": "^0.22.0",
     "@neondatabase/serverless": "^0.10.4",
+    "@reach/combobox": "^0.18.0",
     "@react-google-maps/api": "^2.20.6",
+    "@types/google.maps": "^3.58.1",
     "camerakit": "^0.4.1",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.39.3",
@@ -24,7 +27,8 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.2",
-    "react-webcam": "^7.2.0"
+    "react-webcam": "^7.2.0",
+    "use-places-autocomplete": "^4.0.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
