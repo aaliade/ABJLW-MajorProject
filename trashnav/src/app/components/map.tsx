@@ -1,6 +1,5 @@
 "use client";
 
-
 import { useState, useMemo, useCallback, useRef } from "react";
 
 import {
@@ -14,6 +13,8 @@ import {
 import Places from "./places";
 import Distance from "./distance";
 
+
+
 type LatLngLiteral = google.maps.LatLngLiteral;
 type DirectionsResult = google.maps.DirectionsResult;
 type MapOptions = google.maps.MapOptions;
@@ -23,71 +24,16 @@ export default function Map() {
   const [directions, setDirections] = useState<DirectionsResult>();
  
   const center = useMemo<LatLngLiteral>(
-    () => ({ lat: 17.9833 , lng: -76.8000}),
+    () => ({ lat: 18.5194, lng: -77.000}),
     []
   );
-  const darkModeStyles = [
-    { elementType: "geometry", stylers: [{ color: "#212121" }] },
-    { elementType: "labels.icon", stylers: [{ visibility: "off" }] },
-    { elementType: "labels.text.fill", stylers: [{ color: "#757575" }] },
-    { elementType: "labels.text.stroke", stylers: [{ color: "#212121" }] },
-    {
-      featureType: "administrative",
-      elementType: "geometry",
-      stylers: [{ color: "#757575" }],
-    },
-    {
-      featureType: "administrative.country",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#9e9e9e" }],
-    },
-    {
-      featureType: "landscape",
-      elementType: "geometry",
-      stylers: [{ color: "#2c2c2c" }],
-    },
-    {
-      featureType: "poi",
-      elementType: "geometry",
-      stylers: [{ color: "#303030" }],
-    },
-    {
-      featureType: "road",
-      elementType: "geometry",
-      stylers: [{ color: "#383838" }],
-    },
-    {
-      featureType: "road",
-      elementType: "geometry.stroke",
-      stylers: [{ color: "#212121" }],
-    },
-    {
-      featureType: "road",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#8a8a8a" }],
-    },
-    {
-      featureType: "transit",
-      elementType: "geometry",
-      stylers: [{ color: "#2c2c2c" }],
-    },
-    {
-      featureType: "water",
-      elementType: "geometry",
-      stylers: [{ color: "#000000" }],
-    },
-    {
-      featureType: "water",
-      elementType: "labels.text.fill",
-      stylers: [{ color: "#3d3d3d" }],
-    },
-  ];
+  
   const options = useMemo<MapOptions>(
     () => ({
       mapId: "ca15b6fb8fe984f7",
       disableDefaultUI: true,
       clickableIcons: false,
-      styles: darkModeStyles,
+      
     }),
     []
   );
@@ -122,7 +68,8 @@ export default function Map() {
   return (
     <div className="container">
       <div className="controls">
-        <h1>Commute?</h1>
+        <br /><br />
+        <h2>TrashNav Map Controls</h2>
         <Places
           setOffice={(position) => {
             setOffice(position);
@@ -134,7 +81,7 @@ export default function Map() {
       </div>
       <div className="map">
         <GoogleMap
-          zoom={14}
+          zoom={9}
           center={center}
           mapContainerClassName="map-container"
           options={options}
@@ -161,19 +108,20 @@ export default function Map() {
               />
 
               <MarkerClusterer>
-                {(clusterer) =>
-                  houses.map((house) => (
-                    <Marker
-                      key={house.lat}
-                      position={house}
-                      clusterer={clusterer}
-                      onClick={() => {
-                        fetchDirections(house);
-                      }}
-                    />
-                  ))
-                }
-                
+                {(clusterer) => (
+                  <>
+                    {houses.map((house, index) => (
+                      <Marker
+                        key={index}
+                        position={house}
+                        clusterer={clusterer}
+                        onClick={() => {
+                          fetchDirections(house);
+                        }}
+                      />
+                    ))}
+                  </>
+                )}
               </MarkerClusterer>
 
               <Circle center={office} radius={15000} options={closeOptions} />
