@@ -1,4 +1,4 @@
-const commutesPerYear = 260 * 2;
+const commutesPerYear = 365 * 2;
 const litresPerKM = 10 / 100;
 const gasLitreCost = 1.5;
 const litreCostKM = litresPerKM * gasLitreCost;
@@ -22,17 +22,16 @@ export default function Distance({ leg }: DistanceProps) {
     <div>
       <p>
         This home is <span className="highlight">{leg.distance.text}</span> away
-        from your office. That would take{" "}
+        from the Riverton City Landfill. That would take{" "}
         <span className="highlight">{leg.duration.text}</span> each direction.
       </p>
 
       <p>
-        That's <span className="highlight">{days} days</span> in your car each
-        year at a cost of{" "}
+        That's <span className="highlight">{days} days</span> if garbage is collected on a average of twice per month
+        for the year in that location with fuel cost of{" "} 
         <span className="highlight">
-          ${new Intl.NumberFormat().format(cost)}
-        </span>
-        .
+          ${new Intl.NumberFormat().format(cost)}  
+        </span> for this single location. 
       </p>
     </div>
   );
