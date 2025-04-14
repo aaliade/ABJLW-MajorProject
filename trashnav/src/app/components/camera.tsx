@@ -49,7 +49,6 @@ const Camera: React.FC = () => {
     } else {
       setError("Geolocation is not supported by your browser.");
     }
-
     const imageSrc = webcamRef.current?.getScreenshot();
     if (imageSrc) {
       localStorage.setItem("capturedImage", imageSrc);
