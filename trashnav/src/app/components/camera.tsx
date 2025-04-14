@@ -131,51 +131,47 @@ const Camera: React.FC = () => {
 
       var json_data = JSON.parse(result_json ?? "{}");
 
-      // if (json_data["wasteType"] == "Invalid" && json_data["Amount"] == "Invalid") {
-      //   console.log("Invalid image. Please try again.");
-      //   return;
-      // } else {
-      if (location) {
-        var userEmail = await getUserById(userData?.email!);
+      if (json_data["wasteType"] == "Invalid" && json_data["Amount"] == "Invalid") {
+        console.log("Invalid image. Please try again.");
+      } else {
+        if (location) {
+          var userEmail = await getUserById(userData?.email!);
 
-        if (userEmail!.length < 1) {
-          await createUser(userData?.name!, userData?.email!);
-        }
-
-        const getAddressFromCoordinates = async (latitude: number, longitude: number) => {
-          const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-
-          const response = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`
-          );
-
-          const data = await response.json();
-
-          console.log("Response:", data);
-
-          if (data.status === "OK" && data.results.length > 0) {
-            return data.results[0].formatted_address;
-          } else {
-            console.log("Unable to fetch address");
+          if (userEmail!.length < 1) {
+            await createUser(userData?.name!, userData?.email!);
           }
-        };
 
+          const getAddressFromCoordinates = async (latitude: number, longitude: number) => {
+            const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-        const address = await getAddressFromCoordinates(location.latitude, location.longitude);
-        console.log("Address:", address);
+            const response = await fetch(
+              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`
+            );
 
-        var userID = await getUserId(userData?.email!);
+            const data = await response.json();
 
-        await createReport(
-          userID!,
-          address,
-          location.longitude,
-          location.latitude,
-          json_data["wasteType"],
-          json_data["Amount"],
-        );
+            if (data.status === "OK" && data.results.length > 0) {
+              return data.results[0].formatted_address;
+            } else {
+              console.log("Unable to fetch address");
+            }
+          };
+
+          const address = await getAddressFromCoordinates(location.latitude, location.longitude) ?? "";
+          console.log("Address:", address);
+
+          var userID = await getUserId(userData?.email!);
+
+          await createReport(
+            userID!,
+            address,
+            location.longitude,
+            location.latitude,
+            json_data["wasteType"],
+            json_data["Amount"],
+          );
+        }
       }
-      // }
     } catch (error) {
       console.error("Error identifying image:", error);
     } finally {
