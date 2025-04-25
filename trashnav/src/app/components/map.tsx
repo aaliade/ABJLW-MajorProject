@@ -8,7 +8,8 @@ import {
   Circle,
   MarkerClusterer,
   useLoadScript,
-  Polyline
+  Polyline,
+  InfoWindow
 } from "@react-google-maps/api";
 
 import Places from "./places";
@@ -29,8 +30,18 @@ interface RoutesResponse {
   }>
 }
 
+// Define location interface with garbage level and area
+interface Location {
+  id: number;
+  name: string;
+  area: string;
+  lat: number;
+  lng: number;
+  garbageLevel: number;
+}
+
 export default function Map() {
-  const [office, setOffice] = useState<LatLngLiteral>();
+  const [landfill, setLandfill] = useState<LatLngLiteral>();
   const [routeResponse, setRouteResponse] = useState<RoutesResponse>();
   const [directions, setDirections] = useState<DirectionsResult>();
   const [error, setError] = useState<string | null>(null);
@@ -38,14 +49,44 @@ export default function Map() {
   const [routeKey, setRouteKey] = useState<number>(0);
   const [lastClickedHouse, setLastClickedHouse] = useState<LatLngLiteral | null>(null);
   const [showRoute, setShowRoute] = useState<boolean>(false);
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(null);
+  const [hoveredLocation, setHoveredLocation] = useState<Location | null>(null);
+  
+  // Add timeout ref to handle hover delay
+  const hoverTimeoutRef = useRef<number | null>(null);
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
     libraries: ["places", "geometry"],
   });
  
+  // Use predefined locations for Jamaica
+  const locations = useMemo<Location[]>(() => [
+    // Papine area
+    { id: 1, name: "Papine Market", area: "Papine", lat: 18.0164, lng: -76.7442, garbageLevel: 85 },
+    { id: 2, name: "UWI Entrance", area: "Papine", lat: 18.0055, lng: -76.7481, garbageLevel: 45 },
+    { id: 3, name: "Papine Square", area: "Papine", lat: 18.0173, lng: -76.7438, garbageLevel: 75 },
+    { id: 4, name: "Hope Road Junction", area: "Papine", lat: 18.0145, lng: -76.7459, garbageLevel: 90 },
+    { id: 5, name: "Gordon Town Road", area: "Papine", lat: 18.0187, lng: -76.7412, garbageLevel: 60 },
+    
+    // Liguanea area
+    { id: 11, name: "Liguanea Plaza", area: "Liguanea", lat: 18.0055, lng: -76.7756, garbageLevel: 65 },
+    { id: 12, name: "Sovereign Centre", area: "Liguanea", lat: 18.0042, lng: -76.7789, garbageLevel: 40 },
+    { id: 13, name: "Hope Road", area: "Liguanea", lat: 18.0075, lng: -76.7742, garbageLevel: 85 },
+    { id: 14, name: "Old Hope Road", area: "Liguanea", lat: 18.0101, lng: -76.7726, garbageLevel: 55 },
+    { id: 15, name: "Lady Musgrave Road", area: "Liguanea", lat: 18.0028, lng: -76.7801, garbageLevel: 70 },
+    
+    // Kintyre area
+    { id: 21, name: "Kintyre Main Road", area: "Kintyre", lat: 18.0344, lng: -76.7255, garbageLevel: 95 },
+    { id: 22, name: "Kintyre Community Centre", area: "Kintyre", lat: 18.0329, lng: -76.7274, garbageLevel: 60 },
+    { id: 23, name: "Kintyre Primary School", area: "Kintyre", lat: 18.0351, lng: -76.7246, garbageLevel: 40 },
+    { id: 24, name: "Dublin Drive", area: "Kintyre", lat: 18.0365, lng: -76.7233, garbageLevel: 85 },
+    { id: 25, name: "Tredegar Park", area: "Kintyre", lat: 18.0311, lng: -76.7292, garbageLevel: 70 },
+  ], []);
+
+  // Set Jamaica center - centered on the whole island
   const center = useMemo<LatLngLiteral>(
-    () => ({ lat: 18.5194, lng: -77.000}),
+    () => ({ lat: 18.1096, lng: -77.2975 }), // Center on Jamaica as a whole
     []
   );
   
@@ -64,8 +105,6 @@ export default function Map() {
     mapRef.current = map;
   }, []);
 
-  const houses = useMemo(() => generateHouses(center), [center]);
-
   // Helper function to compare two locations with a small epsilon for floating point comparison
   const isSameLocation = (loc1: LatLngLiteral | null, loc2: LatLngLiteral): boolean => {
     if (!loc1) return false;
@@ -76,15 +115,28 @@ export default function Map() {
            Math.abs(loc1.lng - loc2.lng) < epsilon;
   };
 
-  const fetchRoute = async (house: LatLngLiteral) => {
-    if (!office) return;
+  // Helper function to get marker icon color based on garbage level
+  const getMarkerIcon = (garbageLevel: number) => {
+    if (garbageLevel >= 70) {
+      return "http://maps.google.com/mapfiles/ms/icons/red-dot.png"; // High level (70-100%)
+    } else if (garbageLevel >= 40) {
+      return "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"; // Medium level (40-69%)
+    } else {
+      return "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"; // Low level (0-39%)
+    }
+  };
+
+  const fetchRoute = async (location: Location) => {
+    if (!landfill) return;
     
-    console.log("Clicked house:", house);
-    console.log("Last clicked house:", lastClickedHouse);
+    console.log("Clicked location:", location);
     
-    // Check if clicking the same house twice to toggle/reset
-    if (isSameLocation(lastClickedHouse, house)) {
-      console.log("Same house clicked twice, clearing route");
+    // Convert Location to LatLngLiteral for comparison
+    const locationLatLng: LatLngLiteral = { lat: location.lat, lng: location.lng };
+    
+    // Check if clicking the same location twice to toggle/reset
+    if (lastClickedHouse && isSameLocation(lastClickedHouse, locationLatLng)) {
+      console.log("Same location clicked twice, clearing route");
       // Clear the route
       setDirections(undefined);
       setRoutePath([]);
@@ -100,7 +152,7 @@ export default function Map() {
       setDirections(undefined);
       setRoutePath([]);
       setRouteKey(prevKey => prevKey + 1); // Increment the key to force re-render
-      setLastClickedHouse(house); // Set the last clicked house
+      setLastClickedHouse(locationLatLng); // Set the last clicked location
       
       const response = await fetch('/api/route', {
         method: 'POST',
@@ -111,16 +163,16 @@ export default function Map() {
           origin: {
             location: {
               latLng: {
-                latitude: house.lat,
-                longitude: house.lng
+                latitude: location.lat,
+                longitude: location.lng
               }
             }
           },
           destination: {
             location: {
               latLng: {
-                latitude: office.lat,
-                longitude: office.lng
+                latitude: landfill.lat,
+                longitude: landfill.lng
               }
             }
           },
@@ -157,8 +209,8 @@ export default function Map() {
         
         // Create a proper bounds object that includes all points
         const bounds = new google.maps.LatLngBounds();
-        bounds.extend(new google.maps.LatLng(house.lat, house.lng));
-        bounds.extend(new google.maps.LatLng(office.lat, office.lng));
+        bounds.extend(new google.maps.LatLng(location.lat, location.lng));
+        bounds.extend(new google.maps.LatLng(landfill.lat, landfill.lng));
         
         // Add some points from the path to ensure the bounds are correct
         if (decodedPath.length > 0) {
@@ -173,8 +225,8 @@ export default function Map() {
               distance: { text: `${Math.round(route.distanceMeters / 1609.34)} mi`, value: route.distanceMeters },
               duration: { text: `${Math.round(Number(route.duration.slice(0, -1)) / 60)} mins`, value: Number(route.duration.slice(0, -1)) },
               steps: [],
-              start_location: new google.maps.LatLng(house.lat, house.lng),
-              end_location: new google.maps.LatLng(office.lat, office.lng),
+              start_location: new google.maps.LatLng(location.lat, location.lng),
+              end_location: new google.maps.LatLng(landfill.lat, landfill.lng),
               start_address: "",
               end_address: "",
               traffic_speed_entry: [],
@@ -193,8 +245,8 @@ export default function Map() {
             types: ["street_address"]
           }],
           request: {
-            origin: house,
-            destination: office,
+            origin: locationLatLng,
+            destination: landfill,
             travelMode: google.maps.TravelMode.DRIVING
           }
         };
@@ -253,13 +305,73 @@ export default function Map() {
         <h2>TrashNav Map Controls</h2>
         <Places
           setOffice={(position) => {
-            setOffice(position);
+            setLandfill(position);
             mapRef.current?.panTo(position);
           }}
         />
-        {!office && <p>Enter the address of your office.</p>}
+        {!landfill && <p>Enter the address of the landfill or waste disposal site.</p>}
         {error && <p style={{ color: 'red' }}>{error}</p>}
         {directions && <Distance leg={directions.routes[0].legs[0]} />}
+        
+        {/* Legend for garbage levels - only show when landfill is set */}
+        {landfill && (
+          <div className="legend" style={{ 
+            marginTop: '20px', 
+            padding: '12px', 
+            backgroundColor: 'rgba(255, 255, 255, 0.9)', 
+            borderRadius: '8px',
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+            border: '1px solid #eaeaea',
+            transition: 'all 0.3s ease'
+          }}>
+            <h3 style={{ 
+              margin: '0 0 12px 0', 
+              color: '#333', 
+              fontSize: '16px', 
+              fontWeight: '600' 
+            }}>Garbage Levels</h3>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{ 
+                  width: '16px', 
+                  height: '16px', 
+                  backgroundColor: 'red', 
+                  borderRadius: '50%', 
+                  marginRight: '10px',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.2)'
+                }}></div>
+                <span style={{ color: '#333', fontSize: '14px' }}>High (70-100%)</span>
+              </div>
+              
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{ 
+                  width: '16px', 
+                  height: '16px', 
+                  backgroundColor: 'yellow', 
+                  borderRadius: '50%', 
+                  marginRight: '10px',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.2)'
+                }}></div>
+                <span style={{ color: '#333', fontSize: '14px' }}>Medium (40-69%)</span>
+              </div>
+              
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{ 
+                  width: '16px', 
+                  height: '16px', 
+                  backgroundColor: 'blue', 
+                  borderRadius: '50%', 
+                  marginRight: '10px',
+                  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.2)'
+                }}></div>
+                <span style={{ color: '#333', fontSize: '14px' }}>Low (0-39%)</span>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Buttons */}
         {showRoute && (
           <button 
             className="clear-route-button" 
@@ -316,39 +428,85 @@ export default function Map() {
       </div>
       <div className="map">
         <GoogleMap
-          zoom={9}
+          zoom={9} // Lower zoom level to see more of Jamaica
           center={center}
           mapContainerClassName="map-container"
           options={options}
           onLoad={onLoad}
         >
-          {office && (
+          {landfill && (
             <>
               <Marker
-                position={office}
+                position={landfill}
                 icon="https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png"
               />
               
               <MarkerClusterer>
                 {(clusterer) => (
                   <>
-                    {houses.map((house) => (
+                    {locations.map((location) => (
                       <Marker
-                        key={house.lat}
-                        position={house}
+                        key={location.id}
+                        position={{ lat: location.lat, lng: location.lng }}
                         clusterer={clusterer}
+                        icon={getMarkerIcon(location.garbageLevel)}
                         onClick={() => {
-                          fetchRoute(house);
+                          fetchRoute(location);
+                        }}
+                        onMouseOver={() => {
+                          // Clear any existing timeout
+                          if (hoverTimeoutRef.current) {
+                            window.clearTimeout(hoverTimeoutRef.current);
+                            hoverTimeoutRef.current = null;
+                          }
+                          // Set the hovered location
+                          setHoveredLocation(location);
+                        }}
+                        onMouseOut={() => {
+                          // Add delay before hiding to prevent flickering
+                          hoverTimeoutRef.current = window.setTimeout(() => {
+                            setHoveredLocation(null);
+                          }, 500); // Increased delay to 500ms
                         }}
                       />
                     ))}
+                    
+                    {/* Info window with offset position */}
+                    {hoveredLocation && (
+                      <InfoWindow
+                        position={{ 
+                          lat: hoveredLocation.lat + 0.005, // Increased offset above marker
+                          lng: hoveredLocation.lng 
+                        }}
+                        options={{ 
+                          disableAutoPan: true, // Prevent map panning when info window opens
+                          pixelOffset: new google.maps.Size(0, -10) // Add additional pixel offset
+                        }}
+                        onCloseClick={() => setHoveredLocation(null)}
+                      >
+                        <div style={{ padding: '5px', color: '#000', minWidth: '150px' }}>
+                          <h3 style={{ margin: '0 0 5px 0', fontSize: '16px', color: '#000' }}>{hoveredLocation.name}</h3>
+                          <p style={{ margin: '0 0 3px 0', fontSize: '14px', color: '#000' }}>Area: {hoveredLocation.area}</p>
+                          <p style={{ margin: '0', fontSize: '14px', color: '#000' }}>
+                            Garbage Level: 
+                            <span style={{ 
+                              fontWeight: 'bold', 
+                              color: hoveredLocation.garbageLevel >= 70 ? '#FF0000' : 
+                                    hoveredLocation.garbageLevel >= 40 ? '#FF8C00' : '#0000FF' 
+                            }}>
+                              {' '}{hoveredLocation.garbageLevel}%
+                            </span>
+                          </p>
+                        </div>
+                      </InfoWindow>
+                    )}
                   </>
                 )}
               </MarkerClusterer>
               
-              <Circle center={office} radius={15000} options={closeOptions} />
-              <Circle center={office} radius={25000} options={middleOptions} />
-              <Circle center={office} radius={30000} options={farOptions} />
+              <Circle center={landfill} radius={15000} options={closeOptions} />
+              <Circle center={landfill} radius={25000} options={middleOptions} />
+              <Circle center={landfill} radius={30000} options={farOptions} />
               
               {/* Only render polyline if showRoute is true and routePath has elements */}
               {showRoute && routePath.length > 0 ? (
@@ -401,16 +559,4 @@ const farOptions = {
   fillOpacity: 0.05,
   strokeColor: "#F44336", // Red
   fillColor: "#F44336",
-};
-
-const generateHouses = (position: LatLngLiteral) => {
-  const _houses: Array<LatLngLiteral> = [];
-  for (let i = 0; i <90; i++) {
-    const direction = Math.random() < 0.5 ? -2 : 2;
-    _houses.push({
-      lat: position.lat + Math.random() / direction,
-      lng: position.lng + Math.random() / direction,
-    });
-  }
-  return _houses;
 };
