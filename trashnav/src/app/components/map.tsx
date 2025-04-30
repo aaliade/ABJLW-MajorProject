@@ -180,8 +180,11 @@ export default function Map() {
       // Clear previous route data
       setError(null);
       setDirections(undefined);
+      
+      // Clear route path and ensure key is updated before setting a new path
       setRoutePath([]);
-      setRouteKey(prevKey => prevKey + 1); // Increment the key to force re-render
+      setRouteKey(prevKey => prevKey + 1);
+      
       setLastClickedHouse(locationLatLng); // Set the last clicked location
       
       const response = await fetch('/api/route', {
@@ -300,31 +303,40 @@ export default function Map() {
 
   const hardReset = () => {
     // Use the most extreme approach - reload the page
+    console.log("Using page reload to clear the route");
     window.location.reload();
   };
 
-  const clearRoute = () => {
-    setDirections(undefined);
-    setRoutePath([]);
-    setRouteResponse(undefined);
-    setLastClickedHouse(null);
-    setShowRoute(false); // Hide the route
-    console.log("Route cleared");
-  };
-
+  // Inside the Map component, add this effect to restore the landfill location on load
   useEffect(() => {
-    // This effect will run when showRoute changes
-    if (!showRoute) {
-      // If showRoute is false, make sure to remove any polylines from the DOM
-      console.log("Effect: Removing polylines from DOM");
-      
-      // Force a re-render with a new key
-      setRouteKey(prevKey => prevKey + 1);
-      
-      // Clear the route path
-      setRoutePath([]);
+    // Check if we have a stored landfill location
+    const storedLandfill = sessionStorage.getItem('landfillLocation');
+    if (storedLandfill) {
+      try {
+        const parsedLandfill = JSON.parse(storedLandfill);
+        setLandfill(parsedLandfill);
+        
+        // If we have a stored landfill and the routeCleared flag is set, we're coming from a reset
+        if (sessionStorage.getItem('routeCleared')) {
+          sessionStorage.removeItem('routeCleared'); // Clear the flag
+          console.log("Route was cleared but landfill location restored");
+        }
+      } catch (e) {
+        console.error("Error parsing stored landfill location", e);
+      }
     }
-  }, [showRoute]);
+  }, []);
+
+  // Update the Places component handler to store the landfill location when it changes
+  const handleLandfillSet = (position: LatLngLiteral) => {
+    setLandfill(position);
+    
+    // Store the landfill location in session storage
+    sessionStorage.setItem('landfillLocation', JSON.stringify(position));
+    
+    // Pan to the new location
+    mapRef.current?.panTo(position);
+  };
 
   if (!isLoaded) return <div>Loading...</div>;
 
@@ -334,10 +346,7 @@ export default function Map() {
         <br /><br />
         <h2>TrashNav Map Controls</h2>
         <Places
-          setOffice={(position) => {
-            setLandfill(position);
-            mapRef.current?.panTo(position);
-          }}
+          setOffice={handleLandfillSet}
         />
         {!landfill && <p>Enter the address of the landfill or waste disposal site.</p>}
         {error && <p style={{ color: 'red' }}>{error}</p>}
@@ -401,60 +410,31 @@ export default function Map() {
           </div>
         )}
         
-        {/* Buttons */}
+        {/* Only show Clear Route button when a route is displayed */}
         {showRoute && (
           <button 
             className="clear-route-button" 
-            onClick={hardReset}
+            onClick={() => {
+              console.log("Reloading page to clear route");
+              window.location.reload();
+            }}
             style={{
-              marginTop: '10px',
-              padding: '8px 16px',
+              marginTop: '20px',
+              padding: '10px 16px',
               backgroundColor: '#4CAF50',
               color: 'white',
               border: 'none',
               borderRadius: '4px',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              display: 'block',
+              fontWeight: '500',
+              boxShadow: '0 2px 5px rgba(0, 0, 0, 0.2)',
+              transition: 'all 0.3s ease'
             }}
           >
             Clear Route
           </button>
         )}
-        {/* Debug button */}
-        <button 
-          onClick={() => {
-            console.log("Current state:");
-            console.log("- routePath length:", routePath.length);
-            console.log("- showRoute:", showRoute);
-            console.log("- lastClickedHouse:", lastClickedHouse);
-          }}
-          style={{
-            marginTop: '10px',
-            marginLeft: '10px',
-            padding: '8px 16px',
-            backgroundColor: '#2196F3',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          Debug Route
-        </button>
-        <button 
-          onClick={hardReset}
-          style={{
-            marginTop: '10px',
-            marginLeft: '10px',
-            padding: '8px 16px',
-            backgroundColor: '#FF9800',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          Hard Reset
-        </button>
       </div>
       <div className="map">
         <GoogleMap
@@ -469,6 +449,16 @@ export default function Map() {
               <Marker
                 position={landfill}
                 icon="https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png"
+                onMouseOver={() => setHoveredLocation({ id: 0, name: "Riverton City Dump", area: "Kingston", lat: landfill.lat, lng: landfill.lng, garbageLevel: 0 })}
+                onMouseOut={() => {
+                  if (hoverTimeoutRef.current) {
+                    window.clearTimeout(hoverTimeoutRef.current);
+                    hoverTimeoutRef.current = null;
+                  }
+                  hoverTimeoutRef.current = window.setTimeout(() => {
+                    setHoveredLocation(null);
+                  }, 500);
+                }}
               />
               
               <MarkerClusterer>
@@ -505,28 +495,30 @@ export default function Map() {
                     {hoveredLocation && (
                       <InfoWindow
                         position={{ 
-                          lat: hoveredLocation.lat, // Position at the exact point
+                          lat: hoveredLocation.lat,
                           lng: hoveredLocation.lng 
                         }}
                         options={{ 
-                          disableAutoPan: true, // Prevent map panning when info window opens
-                          pixelOffset: new google.maps.Size(0, -35) // Offset upward by pixel amount instead of coordinate
+                          disableAutoPan: true,
+                          pixelOffset: new google.maps.Size(0, -35)
                         }}
                         onCloseClick={() => setHoveredLocation(null)}
                       >
                         <div style={{ padding: '5px', color: '#000', minWidth: '150px' }}>
                           <h3 style={{ margin: '0 0 5px 0', fontSize: '16px', color: '#000' }}>{hoveredLocation.name}</h3>
                           <p style={{ margin: '0 0 3px 0', fontSize: '14px', color: '#000' }}>Area: {hoveredLocation.area}</p>
-                          <p style={{ margin: '0', fontSize: '14px', color: '#000' }}>
-                            Garbage Level: 
-                            <span style={{ 
-                              fontWeight: 'bold', 
-                              color: hoveredLocation.garbageLevel >= 70 ? '#FF0000' : 
-                                    hoveredLocation.garbageLevel >= 40 ? '#FF8C00' : '#0000FF' 
-                            }}>
-                              {' '}{hoveredLocation.garbageLevel}%
-                            </span>
-                          </p>
+                          {hoveredLocation.id !== 0 && (
+                            <p style={{ margin: '0', fontSize: '14px', color: '#000' }}>
+                              Garbage Level: 
+                              <span style={{ 
+                                fontWeight: 'bold', 
+                                color: hoveredLocation.garbageLevel >= 70 ? '#FF0000' : 
+                                      hoveredLocation.garbageLevel >= 40 ? '#FF8C00' : '#0000FF' 
+                              }}>
+                                {' '}{hoveredLocation.garbageLevel}%
+                              </span>
+                            </p>
+                          )}
                         </div>
                       </InfoWindow>
                     )}
@@ -538,8 +530,11 @@ export default function Map() {
               <Circle center={landfill} radius={25000} options={middleOptions} />
               <Circle center={landfill} radius={30000} options={farOptions} />
               
-              {/* Only render polyline if showRoute is true and routePath has elements */}
-              {showRoute && routePath.length > 0 ? (
+              {/* Only render polyline if ALL conditions are met:
+                  1. showRoute is true (a route is active)
+                  2. routePath exists with elements
+                  3. showPolyline is true (not in the middle of a clear operation) */}
+              {showRoute && routePath && routePath.length > 0 && (
                 <Polyline
                   key={`polyline-${routeKey}`}
                   path={routePath}
@@ -549,7 +544,7 @@ export default function Map() {
                     strokeWeight: 5,
                   }}
                 />
-              ) : null}
+              )}
             </>
           )}
         </GoogleMap>
@@ -558,6 +553,7 @@ export default function Map() {
   );
 }
 
+// These option definitions should only appear ONCE in the file
 const defaultOptions = {
   strokeOpacity: 0.5,
   strokeWeight: 2,

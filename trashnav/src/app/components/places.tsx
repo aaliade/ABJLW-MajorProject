@@ -40,7 +40,7 @@ return (
       onChange={(e: React.ChangeEvent<HTMLInputElement>) => setValue(e.target.value)}
       disabled={!ready}
       className="combobox-input"
-      placeholder="Enter landfill location"
+      placeholder="Enter Landfill Location"
     />
     <ComboboxPopover>
       <ComboboxList>
