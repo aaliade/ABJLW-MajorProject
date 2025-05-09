@@ -34,7 +34,7 @@ export default function Home() {
           cursor: 'pointer'
         }}
       >
-        Force Refresh Map
+        Refresh Map
       </button>
     </div>
   );
