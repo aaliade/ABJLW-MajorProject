@@ -1,17 +1,26 @@
-import Link from "next/link"
+"use client";
+import styles from "../styles/Navbar.module.css";
+import { useRouter } from "next/navigation";
 
 export default function Navbar() {
+    const router = useRouter();
+
+    const handleNavigation = (path: string) => {
+        router.push(path);
+    };
+
     return (
-        <nav className="bg-blue-800 p-4">
-            <ul className="flex justify-evenly text-2xl font-bold">
-                <li><Link href="/">Home</Link></li>
-                <li><Link href="/api/auth/signin">Sign In</Link></li>
-                <li><Link href="/api/auth/signout">Sign Out</Link></li>
-                <li><Link href="/report">Report</Link></li>
-                <li><Link href="/map">Map</Link></li>
-
-            </ul>
+        <nav className={styles.navbar}>
+            <div className={styles.container}>
+                <div className={styles.logo}>TrashNav</div>
+                <ul className={styles.navList}>
+                    <li><button className={styles.navButton} onClick={() => handleNavigation('/')}>Home</button></li>
+                    <li><button className={styles.navButton} onClick={() => handleNavigation('/api/auth/signin')}>Sign In</button></li>
+                    <li><button className={styles.navButton} onClick={() => handleNavigation('/api/auth/signout')}>Sign Out</button></li>
+                    <li><button className={styles.navButton} onClick={() => handleNavigation('/report')}>Report</button></li>
+                    <li><button className={styles.navButton} onClick={() => handleNavigation('/map')}>Map</button></li>
+                </ul>
+            </div>
         </nav>
-    )
+    );
 }
-
