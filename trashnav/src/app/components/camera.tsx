@@ -181,24 +181,41 @@ const Camera: React.FC = () => {
 
   return (
     <div style={{ textAlign: "center" }}>
-      <h1>Webcam Feed</h1>
+      <h1 className="text-2xl font-bold mb-4">Webcam Feed</h1>
       <Webcam
         ref={webcamRef}
         videoConstraints={videoConstraints}
         mirrored={false}
         screenshotFormat="image/jpeg"
-        style={{ width: "100%", height: "auto" }}
+        style={{
+          marginTop: "10px",
+          width: "100%",
+          height: "auto",
+          border: "5px solid #ccc",
+          borderRadius: "10px",
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)", 
+        }}
       />
-      <button onClick={capture} style={{ marginTop: "10px", padding: "10px" }}>
-        Capture Photo
-      </button>
-      <button
-        onClick={identifyImage}
-        style={{ marginTop: "10px", padding: "10px" }}
-        disabled={loading}
-      >
-        {loading ? "Processing..." : "Send To AI"}
-      </button>
+      <div className="mt-4 flex justify-center gap-8">
+        <button
+            onClick={capture}
+            className="px-4 py-2 bg-gray-800 text-white font-medium rounded-md hover:bg-green-600 transition"
+          >
+            Capture Photo
+        </button>
+
+        <button
+          onClick={identifyImage}
+          disabled={loading} // Disable the button when loading
+          className={`px-4 py-2 font-medium rounded-md transition ${
+            loading
+              ? "bg-gray-400 text-gray-700 cursor-not-allowed" 
+              : "bg-gray-800 text-white hover:bg-green-600" 
+          }`}
+        >
+          {loading ? "Processing..." : "Send to AI"}
+        </button>
+      </div>
     </div>
   );
 };
