@@ -51,6 +51,14 @@ export default function Navbar({ user }: NavbarProps) {
               Map
             </button>
           </li>
+          <li>
+            <button
+              className={styles.navButton}
+              onClick={() => handleNavigation("/insights")}
+            >
+             Insights 
+            </button>
+          </li>
         </ul>
 
         {/* Profile or Sign In */}
