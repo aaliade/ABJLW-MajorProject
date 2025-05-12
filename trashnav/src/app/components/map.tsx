@@ -15,7 +15,7 @@ import {
 import Places from "./places";
 import Distance from "./distance";
 import { simulatedAnnealingTSP, calculateTotalDistance } from '../../utils/simulatedAnnealing';
-
+import { getReports } from '../../utils/db/getReports'; 
 type LatLngLiteral = google.maps.LatLngLiteral;
 type DirectionsResult = google.maps.DirectionsResult;
 type MapOptions = google.maps.MapOptions;
@@ -59,7 +59,7 @@ export default function Map() {
   const [isOptimizing, setIsOptimizing] = useState<boolean>(false);
   const [currentBestDistance, setCurrentBestDistance] = useState<number>(0);
   const [showAnalysis, setShowAnalysis] = useState<boolean>(false);
-  
+  const [locations, setLocations] = useState<Location[]>([]);
   // Add new state variables for analysis
   const [analysisData, setAnalysisData] = useState<{
     totalTime: number;
@@ -90,61 +90,29 @@ export default function Map() {
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
     libraries: ["places", "geometry"],
   });
- 
-  // Use predefined locations for Jamaica
-  const locations = useMemo<Location[]>(() => [
-    // Papine area
-    { id: 1, name: "Papine Market", area: "Papine", lat: 18.0164, lng: -76.7442, garbageLevel: 85 },
-    { id: 2, name: "UWI Entrance", area: "Papine", lat: 18.0055, lng: -76.7481, garbageLevel: 45 },
-    { id: 3, name: "Papine Square", area: "Papine", lat: 18.0173, lng: -76.7438, garbageLevel: 75 },
-    { id: 4, name: "Hope Road Junction", area: "Papine", lat: 18.0145, lng: -76.7459, garbageLevel: 90 },
-    { id: 5, name: "Gordon Town Road", area: "Papine", lat: 18.0187, lng: -76.7412, garbageLevel: 60 },
-    { id: 6, name: "August Town Road", area: "Papine", lat: 18.0197, lng: -76.7432, garbageLevel: 82 },
-    { id: 7, name: "University Hospital", area: "Papine", lat: 18.0087, lng: -76.7465, garbageLevel: 25 },
-    { id: 8, name: "Mona Heights", area: "Papine", lat: 18.0109, lng: -76.7492, garbageLevel: 38 },
-    { id: 9, name: "Tavern Community", area: "Papine", lat: 18.0201, lng: -76.7398, garbageLevel: 95 },
-    { id: 10, name: "Mona Road", area: "Papine", lat: 18.0068, lng: -76.7452, garbageLevel: 55 },
-    { id: 11, name: "Golding Avenue", area: "Papine", lat: 18.0048, lng: -76.7439, garbageLevel: 43 },
-    { id: 12, name: "Mona Common", area: "Papine", lat: 18.0135, lng: -76.7425, garbageLevel: 78 },
-    { id: 13, name: "August Town Police Station", area: "Papine", lat: 18.0189, lng: -76.7389, garbageLevel: 32 },
-    { id: 14, name: "University Crescent", area: "Papine", lat: 18.0079, lng: -76.7472, garbageLevel: 59 },
-    { id: 15, name: "Chancellor Hall", area: "Papine", lat: 18.0052, lng: -76.7459, garbageLevel: 65 },
-    
-    // Liguanea area
-    { id: 16, name: "Liguanea Plaza", area: "Liguanea", lat: 18.0055, lng: -76.7756, garbageLevel: 65 },
-    { id: 17, name: "Sovereign Centre", area: "Liguanea", lat: 18.0042, lng: -76.7789, garbageLevel: 40 },
-    { id: 18, name: "Hope Road", area: "Liguanea", lat: 18.0075, lng: -76.7742, garbageLevel: 85 },
-    { id: 19, name: "Old Hope Road", area: "Liguanea", lat: 18.0101, lng: -76.7726, garbageLevel: 55 },
-    { id: 20, name: "Lady Musgrave Road", area: "Liguanea", lat: 18.0028, lng: -76.7801, garbageLevel: 70 },
-    { id: 21, name: "Kings House", area: "Liguanea", lat: 18.0095, lng: -76.7773, garbageLevel: 28 },
-    { id: 22, name: "Devon House", area: "Liguanea", lat: 18.0119, lng: -76.7799, garbageLevel: 35 },
-    { id: 23, name: "Hope Gardens", area: "Liguanea", lat: 18.0145, lng: -76.7783, garbageLevel: 22 },
-    { id: 24, name: "Hope Zoo", area: "Liguanea", lat: 18.0152, lng: -76.7768, garbageLevel: 45 },
-    { id: 25, name: "UTECH Campus", area: "Liguanea", lat: 18.0181, lng: -76.7732, garbageLevel: 58 },
-    { id: 26, name: "Matilda's Corner", area: "Liguanea", lat: 18.0071, lng: -76.7712, garbageLevel: 79 },
-    { id: 27, name: "Barbican Road", area: "Liguanea", lat: 18.0132, lng: -76.7693, garbageLevel: 82 },
-    { id: 28, name: "Jack's Hill Road", area: "Liguanea", lat: 18.0175, lng: -76.7638, garbageLevel: 38 },
-    { id: 29, name: "Grants Pen Road", area: "Liguanea", lat: 18.0201, lng: -76.7719, garbageLevel: 88 },
-    { id: 30, name: "Constant Spring Road", area: "Liguanea", lat: 18.0219, lng: -76.7752, garbageLevel: 72 },
-    
-    // Kintyre area
-    { id: 31, name: "Kintyre Main Road", area: "Kintyre", lat: 18.0344, lng: -76.7255, garbageLevel: 95 },
-    { id: 32, name: "Kintyre Community Centre", area: "Kintyre", lat: 18.0329, lng: -76.7274, garbageLevel: 60 },
-    { id: 33, name: "Kintyre Primary School", area: "Kintyre", lat: 18.0351, lng: -76.7246, garbageLevel: 40 },
-    { id: 34, name: "Dublin Drive", area: "Kintyre", lat: 18.0365, lng: -76.7233, garbageLevel: 85 },
-    { id: 35, name: "Tredegar Park", area: "Kintyre", lat: 18.0311, lng: -76.7292, garbageLevel: 70 },
-    { id: 36, name: "Wedge Close", area: "Kintyre", lat: 18.0338, lng: -76.7219, garbageLevel: 87 },
-    { id: 37, name: "Sylvan Avenue", area: "Kintyre", lat: 18.0323, lng: -76.7242, garbageLevel: 49 },
-    { id: 38, name: "Leckford Avenue", area: "Kintyre", lat: 18.0313, lng: -76.7231, garbageLevel: 62 },
-    { id: 39, name: "Deanery Road", area: "Kintyre", lat: 18.0355, lng: -76.7281, garbageLevel: 78 },
-    { id: 40, name: "Hillview Avenue", area: "Kintyre", lat: 18.0305, lng: -76.7263, garbageLevel: 31 },
-    { id: 41, name: "Deanery Drive", area: "Kintyre", lat: 18.0372, lng: -76.7269, garbageLevel: 53 },
-    { id: 42, name: "Langston Road", area: "Kintyre", lat: 18.0382, lng: -76.7251, garbageLevel: 92 },
-    { id: 43, name: "Whitehall Avenue", area: "Kintyre", lat: 18.0299, lng: -76.7239, garbageLevel: 67 },
-    { id: 44, name: "Kintyre Heights", area: "Kintyre", lat: 18.0318, lng: -76.7213, garbageLevel: 73 },
-    { id: 45, name: "Mountain View Avenue", area: "Kintyre", lat: 18.0292, lng: -76.7276, garbageLevel: 89 },
-  ], []);
 
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const data = await getReports();
+        const mapped = data.map((item: any) => ({
+          id: item.id,
+          name: item.name,
+          area: item.address,
+          lat: item.latitude,
+          lng: item.longitude,
+          garbageLevel: item.garbagelevel,
+        }));
+        setLocations(mapped);
+      } catch (err) {
+        console.error('Failed to fetch reports:', err);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  
   // Set Jamaica center - centered on the whole island
   const center = useMemo<LatLngLiteral>(
     () => ({ lat: 18.1096, lng: -77.2975 }), // Center on Jamaica as a whole

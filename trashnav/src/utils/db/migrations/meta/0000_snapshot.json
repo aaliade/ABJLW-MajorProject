@@ -1,5 +1,5 @@
 {
-  "id": "73d32c13-f212-45be-aa8b-7bdeded57798",
+  "id": "58eb1e0d-8f8f-4e4c-962d-eb61739da122",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -156,6 +156,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
         "address": {
           "name": "address",
           "type": "text",
@@ -174,46 +180,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "waste_type": {
-          "name": "waste_type",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "amount": {
-          "name": "amount",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "image_url": {
-          "name": "image_url",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "verification_result": {
-          "name": "verification_result",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "status": {
-          "name": "status",
-          "type": "varchar(255)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'pending'"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "collector_id": {
-          "name": "collector_id",
+        "garbagelevel": {
+          "name": "garbagelevel",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -227,19 +195,6 @@
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "reports_collector_id_users_id_fk": {
-          "name": "reports_collector_id_users_id_fk",
-          "tableFrom": "reports",
-          "tableTo": "users",
-          "columnsFrom": [
-            "collector_id"
           ],
           "columnsTo": [
             "id"

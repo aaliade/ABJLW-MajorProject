@@ -18,14 +18,11 @@ CREATE TABLE "notifications" (
 CREATE TABLE "reports" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"user_id" integer NOT NULL,
-	"location" text NOT NULL,
-	"waste_type" varchar(255) NOT NULL,
-	"amount" varchar(255) NOT NULL,
-	"image_url" text,
-	"verification_result" jsonb,
-	"status" varchar(255) DEFAULT 'pending' NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"collector_id" integer
+	"name" text NOT NULL,
+	"address" text NOT NULL,
+	"latitude" double precision NOT NULL,
+	"longitude" double precision NOT NULL,
+	"garbagelevel" integer
 );
 --> statement-breakpoint
 CREATE TABLE "rewards" (
@@ -46,6 +43,7 @@ CREATE TABLE "transactions" (
 	"user_id" integer NOT NULL,
 	"type" varchar(20) NOT NULL,
 	"amount" integer NOT NULL,
+	"status" varchar(20) DEFAULT 'pending' NOT NULL,
 	"description" text NOT NULL,
 	"date" timestamp DEFAULT now() NOT NULL
 );
@@ -62,6 +60,5 @@ ALTER TABLE "collected_wastes" ADD CONSTRAINT "collected_wastes_report_id_report
 ALTER TABLE "collected_wastes" ADD CONSTRAINT "collected_wastes_collector_id_users_id_fk" FOREIGN KEY ("collector_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "notifications" ADD CONSTRAINT "notifications_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "reports" ADD CONSTRAINT "reports_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "reports" ADD CONSTRAINT "reports_collector_id_users_id_fk" FOREIGN KEY ("collector_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "rewards" ADD CONSTRAINT "rewards_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "transactions" ADD CONSTRAINT "transactions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE no action ON UPDATE no action;
