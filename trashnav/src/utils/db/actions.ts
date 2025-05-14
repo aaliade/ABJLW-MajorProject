@@ -28,6 +28,9 @@ export async function createUser(name: string, email: string) {
   }
 }
 
+
+// TODO: Change this to match what's in seed.ts
+
 // Create a new report
 export async function createReport(
   userId: number,

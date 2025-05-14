@@ -139,74 +139,80 @@ const Camera: React.FC = () => {
 
       var json_data = JSON.parse(result_json ?? "{}");
 
-      // if (
-      //   json_data["wasteType"] == "Invalid" &&
-      //   json_data["Amount"] == "Invalid"
-      // ) {
-      //   console.log("Invalid image. Please try again.");
-      // } else {
-      if (location) {
-        var userEmail = await getUserById(userData?.email!);
+      if (
+        json_data["wasteType"] == "Invalid" &&
+        json_data["Amount"] == "Invalid"
+      ) {
+        console.log("Invalid image. Please try again.");
+      } else {
+        if (location) {
+          var userEmail = await getUserById(userData?.email!);
 
-        if (userEmail!.length < 1) {
-          await createUser(userData?.name!, userData?.email!);
-        }
+          if (userEmail!.length < 1) {
+            await createUser(userData?.name!, userData?.email!);
+          }
 
-        const getAddressFromCoordinates = async (
-          latitude: number,
-          longitude: number
-        ) => {
-          const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+          const getAddressFromCoordinates = async (
+            latitude: number,
+            longitude: number
+          ) => {
+            const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-          const response = await fetch(
-            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`
+            const response = await fetch(
+              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`
+            );
+
+            const data = await response.json();
+
+            if (data.status === "OK" && data.results.length > 0) {
+              return data.results[0].formatted_address;
+            } else {
+              console.log("Unable to fetch address");
+            }
+          };
+
+          const address =
+            (await getAddressFromCoordinates(
+              location.latitude,
+              location.longitude
+            )) ?? "";
+          console.log("Address:", address);
+
+          var userID = await getUserId(userData?.email!);
+
+          await createReport(
+            userID!,
+            address,
+            location.longitude,
+            location.latitude,
+            json_data["wasteType"],
+            json_data["Amount"]
           );
 
-          const data = await response.json();
+          console.log("HERE");
 
-          if (data.status === "OK" && data.results.length > 0) {
-            return data.results[0].formatted_address;
-          } else {
-            console.log("Unable to fetch address");
-          }
-        };
+          await fetch("/api/send-email", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              to: userData?.email,
+              subject: "Waste Report Submitted",
+              text: `Hey ${userData?.name},
+        We have received your waste report. You will receive a notification when it is picked up.
 
-        const address =
-          (await getAddressFromCoordinates(
-            location.latitude,
-            location.longitude
-          )) ?? "";
-        console.log("Address:", address);
+        Thank you for your contribution to the environment!
 
-        var userID = await getUserId(userData?.email!);
+        Sincerely,
+        The TrashNav Team`,
+            }),
+          });
 
-        await createReport(
-          userID!,
-          address,
-          location.longitude,
-          location.latitude,
-          json_data["wasteType"],
-          json_data["Amount"]
-        );
-
-        await fetch("/api/send-email", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            to: userData?.email,
-            subject: "Waste Report Submitted",
-            text: `Hey ${userData?.name},
-We have received your waste report. You will receive a notification when it is picked up.
-            
-Thank you for your contribution to the environment!
-
-Sincerely,
-The TrashNav Team`,
-          }),
-        });
-        // }
+          alert(
+            "Your waste report has been submitted. You will receive a notification when it is picked up.\n\nThank you for your contribution to the environment!"
+          );
+        }
       }
     } catch (error) {
       console.error("Error identifying image:", error);
