@@ -4,8 +4,12 @@ import React, { useRef, useCallback, useState, useEffect } from "react";
 import Webcam from "react-webcam";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { toast } from "react-hot-toast";
-import { getUserById, getUserId, createUser, createReport } from "@/utils/db/actions";
-import { json } from "stream/consumers";
+import {
+  getUserById,
+  getUserId,
+  createUser,
+  createReport,
+} from "@/utils/db/actions";
 
 const Camera: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -121,58 +125,88 @@ const Camera: React.FC = () => {
           Return just the JSON object with ONLY wasteType and Amount.
           Remove the \`\`\`json \`\`\` form the JSON object. 
           `,
-
         },
         image, // Correctly formatted image input
       ]);
 
       const response = await result.response;
-      var result_json = response.candidates && response.candidates[0]?.content.parts[0]?.text?.replace("```json", "").replace("```", "").replace("\n", "");
+      var result_json =
+        response.candidates &&
+        response.candidates[0]?.content.parts[0]?.text
+          ?.replace("```json", "")
+          .replace("```", "")
+          .replace("\n", "");
 
       var json_data = JSON.parse(result_json ?? "{}");
 
-      if (json_data["wasteType"] == "Invalid" && json_data["Amount"] == "Invalid") {
-        console.log("Invalid image. Please try again.");
-      } else {
-        if (location) {
-          var userEmail = await getUserById(userData?.email!);
+      // if (
+      //   json_data["wasteType"] == "Invalid" &&
+      //   json_data["Amount"] == "Invalid"
+      // ) {
+      //   console.log("Invalid image. Please try again.");
+      // } else {
+      if (location) {
+        var userEmail = await getUserById(userData?.email!);
 
-          if (userEmail!.length < 1) {
-            await createUser(userData?.name!, userData?.email!);
-          }
+        if (userEmail!.length < 1) {
+          await createUser(userData?.name!, userData?.email!);
+        }
 
-          const getAddressFromCoordinates = async (latitude: number, longitude: number) => {
-            const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+        const getAddressFromCoordinates = async (
+          latitude: number,
+          longitude: number
+        ) => {
+          const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-            const response = await fetch(
-              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`
-            );
-
-            const data = await response.json();
-
-            if (data.status === "OK" && data.results.length > 0) {
-              return data.results[0].formatted_address;
-            } else {
-              console.log("Unable to fetch address");
-            }
-          };
-
-          const address = await getAddressFromCoordinates(location.latitude, location.longitude) ?? "";
-          console.log("Address:", address);
-
-          var userID = await getUserId(userData?.email!);
-
-          await createReport(
-            userID!,
-            address,
-            location.longitude,
-            location.latitude,
-            json_data["wasteType"],
-            json_data["Amount"],
+          const response = await fetch(
+            `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${apiKey}`
           );
 
-          // TODO: Send a email to the user notifying them that their report has been receive
-        }
+          const data = await response.json();
+
+          if (data.status === "OK" && data.results.length > 0) {
+            return data.results[0].formatted_address;
+          } else {
+            console.log("Unable to fetch address");
+          }
+        };
+
+        const address =
+          (await getAddressFromCoordinates(
+            location.latitude,
+            location.longitude
+          )) ?? "";
+        console.log("Address:", address);
+
+        var userID = await getUserId(userData?.email!);
+
+        await createReport(
+          userID!,
+          address,
+          location.longitude,
+          location.latitude,
+          json_data["wasteType"],
+          json_data["Amount"]
+        );
+
+        await fetch("/api/send-email", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            to: userData?.email,
+            subject: "Waste Report Submitted",
+            text: `Hey ${userData?.name},
+We have received your waste report. You will receive a notification when it is picked up.
+            
+Thank you for your contribution to the environment!
+
+Sincerely,
+The TrashNav Team`,
+          }),
+        });
+        // }
       }
     } catch (error) {
       console.error("Error identifying image:", error);
@@ -195,15 +229,15 @@ const Camera: React.FC = () => {
           height: "auto",
           border: "5px solid #ccc",
           borderRadius: "10px",
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)", 
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
         }}
       />
       <div className="mt-4 flex justify-center gap-8">
         <button
-            onClick={capture}
-            className="px-4 py-2 bg-gray-800 text-white font-medium rounded-md hover:bg-green-600 transition"
-          >
-            Capture Photo
+          onClick={capture}
+          className="px-4 py-2 bg-gray-800 text-white font-medium rounded-md hover:bg-green-600 transition"
+        >
+          Capture Photo
         </button>
 
         <button
@@ -211,8 +245,8 @@ const Camera: React.FC = () => {
           disabled={loading} // Disable the button when loading
           className={`px-4 py-2 font-medium rounded-md transition ${
             loading
-              ? "bg-gray-400 text-gray-700 cursor-not-allowed" 
-              : "bg-gray-800 text-white hover:bg-green-600" 
+              ? "bg-gray-400 text-gray-700 cursor-not-allowed"
+              : "bg-gray-800 text-white hover:bg-green-600"
           }`}
         >
           {loading ? "Processing..." : "Send to AI"}
