@@ -1,55 +1,55 @@
 .navbar {
-    background: linear-gradient(to right, #1a1a1a, #2d2d2d);
-    padding: 0.75rem 1rem;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-    position: fixed;
-    width: 100%;
-    top: 0;
-    z-index: 1000; /* High z-index */
-}
-  
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position:relative;
-  }
-  
-  .logo {
-    color: #ffffff;
-    font-size: 1.5rem;
-    font-weight: bold;
-    text-decoration: none;
-    letter-spacing: 1px;
-  }
-  
-  .navList {
-    display: flex;
-    gap: 2rem;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .signOutButton {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: crimson;
-    cursor: pointer;
-    font-size: 1rem;
-}
-  .signOutButton:hover {
-    transform: scale(1.1);
+  background: linear-gradient(to right, #1a1a1a, #2d2d2d);
+  padding: 0.75rem 1rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1000; /* High z-index */
 }
 
-  .signOutText {
-    padding: 10px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color:#ffffff;
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.logo {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-decoration: none;
+  letter-spacing: 1px;
+}
+
+.navList {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.signOutButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: crimson;
+  cursor: pointer;
+  font-size: 1rem;
+}
+.signOutButton:hover {
+  transform: scale(1.1);
+}
+
+.signOutText {
+  padding: 10px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #ffffff;
 }
 
 .signInButton {
@@ -68,103 +68,103 @@
   padding: 10px;
   font-size: 0.875rem;
   font-weight: 500;
-  color:#ffffff;
+  color: #ffffff;
 }
-  
-  .navButton {
-    background: rgba(255, 255, 255, 0.08);
-    color: #ffffff;
-    border: 1.5px solid transparent;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-    backdrop-filter: blur(5px);
-  }
-  
-  .navButton::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      120deg,
-      transparent,
-      rgba(46, 213, 115, 0.2),
-      transparent
-    );
-    transition: all 0.6s ease;
-  }
-  
-  .navButton:hover {
-    background: rgba(46, 213, 115, 0.15);
-    border-color: rgba(46, 213, 115, 0.5);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(46, 213, 115, 0.2);
-    letter-spacing: 0.3px;
-  }
-  
-  .navButton:hover::before {
-    left: 100%;
-  }
-  
-  .navButton:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 6px rgba(46, 213, 115, 0.2);
-  }
-  
+
+.navButton {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  border: 1.5px solid transparent;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(5px);
+}
+
+.navButton::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(46, 213, 115, 0.2),
+    transparent
+  );
+  transition: all 0.6s ease;
+}
+
+.navButton:hover {
+  background: rgba(46, 213, 115, 0.15);
+  border-color: rgba(46, 213, 115, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(46, 213, 115, 0.2);
+  letter-spacing: 0.3px;
+}
+
+.navButton:hover::before {
+  left: 100%;
+}
+
+.navButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(46, 213, 115, 0.2);
+}
+
+.menuButton {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.menuIcon {
+  width: 20px;
+  height: 20px;
+}
+
+@media (max-width: 768px) {
   .menuButton {
+    display: block;
+  }
+
+  .navList {
     display: none;
-    background: none;
-    border: none;
-    color: white;
-    cursor: pointer;
-    padding: 0.5rem;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #1a1a1a;
+    padding: 0.75rem;
+    flex-direction: column;
+    gap: 0.5rem;
+    backdrop-filter: blur(10px);
   }
-  
-  .menuIcon {
-    width: 20px;
-    height: 20px;
+
+  .navList.open {
+    display: flex;
   }
-  
-  @media (max-width: 768px) {
-    .menuButton {
-      display: block;
-    }
-  
-    .navList {
-      display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: #1a1a1a;
-      padding: 0.75rem;
-      flex-direction: column;
-      gap: 0.5rem;
-      backdrop-filter: blur(10px);
-    }
-  
-    .navList.open {
-      display: flex;
-    }
-  
-    .navButton {
-      width: 100%;
-      text-align: center;
-    }
+
+  .navButton {
+    width: 100%;
+    text-align: center;
   }
-  
-  .mainContent {
-    margin-top: 4rem;
-    padding: 2rem;
-  }
+}
+
+.mainContent {
+  margin-top: 4rem;
+  padding: 2rem;
+}
 
 .profileContainer {
   display: flex;
@@ -177,4 +177,45 @@
   cursor: pointer;
   border: 2px solid green;
   transition: transform 0.3s ease;
+}
+
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  cursor: pointer;
+  color: white;
+}
+
+/* Mobile first */
+@media (max-width: 768px) {
+  .hamburger {
+    display: block;
+  }
+
+  .navList {
+    display: none;
+    flex-direction: column;
+    background: #1a1a1a;
+    position: absolute;
+    top: 70px;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    z-index: 99;
+  }
+
+  .mobileMenuOpen {
+    display: flex;
+  }
+
+  .navButton {
+    margin: 0.5rem 0;
+    width: 100%;
+  }
+
+  .container {
+    position: relative;
+  }
 }

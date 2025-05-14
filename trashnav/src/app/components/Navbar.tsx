@@ -3,7 +3,7 @@ import styles from "../styles/Navbar.module.css";
 import { useRouter } from "next/navigation";
 import { FiLogOut } from "react-icons/fi";
 import Image from "next/image";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 
 type User = {
   name?: string | null;
@@ -16,18 +16,27 @@ type NavbarProps = {
 };
 
 export default function Navbar({ user }: NavbarProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
   const router = useRouter();
 
   const handleNavigation = (path: string) => {
+    setMenuOpen(false);
     router.push(path);
   };
 
-  // TODO: Check the screen resolution here
-  // TODO: Add button here to open drawer
+  const toggleMenu = () => setMenuOpen(!menuOpen);
 
   return (
     <nav className={styles.navbar}>
       <div className={styles.container}>
+        <button
+          className={styles.hamburger}
+          onClick={toggleMenu}
+          aria-label="Toggle Menu"
+        >
+          <span className={styles.hamburgerIcon}>☰</span>
+        </button>
+
         {/* Logo */}
         <div
           className={styles.logo}
@@ -38,7 +47,9 @@ export default function Navbar({ user }: NavbarProps) {
         </div>
 
         {/* Navigation Links */}
-        <ul className={styles.navList}>
+        <ul
+          className={`${styles.navList} ${menuOpen ? styles.mobileMenuOpen : ""}`}
+        >
           <li>
             <button
               className={styles.navButton}
@@ -60,7 +71,7 @@ export default function Navbar({ user }: NavbarProps) {
               className={styles.navButton}
               onClick={() => handleNavigation("/insights")}
             >
-             Insights 
+              Insights
             </button>
           </li>
         </ul>
