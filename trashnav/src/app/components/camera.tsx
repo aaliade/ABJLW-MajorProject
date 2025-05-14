@@ -170,6 +170,8 @@ const Camera: React.FC = () => {
             json_data["wasteType"],
             json_data["Amount"],
           );
+
+          // TODO: Send a email to the user notifying them that their report has been receive
         }
       }
     } catch (error) {

@@ -3,6 +3,7 @@ import styles from "../styles/Navbar.module.css";
 import { useRouter } from "next/navigation";
 import { FiLogOut } from "react-icons/fi";
 import Image from "next/image";
+import { useEffect } from "react";
 
 type User = {
   name?: string | null;
@@ -20,6 +21,9 @@ export default function Navbar({ user }: NavbarProps) {
   const handleNavigation = (path: string) => {
     router.push(path);
   };
+
+  // TODO: Check the screen resolution here
+  // TODO: Add button here to open drawer
 
   return (
     <nav className={styles.navbar}>
