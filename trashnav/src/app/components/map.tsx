@@ -983,6 +983,8 @@ export default function Map() {
                     </div>
                   </div>
 
+// These are the new ones
+
                   <div
                     style={{
                       display: "flex",
