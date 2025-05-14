@@ -538,6 +538,7 @@ export default function Map() {
         <br />
         <br />
         <h2>TrashNav Map Controls</h2>
+        <br />
         <Places setOffice={handleLandfillSet} />
         {!landfill && (
           <p>Enter the address of the landfill or waste disposal site.</p>
@@ -982,8 +983,6 @@ export default function Map() {
                       </p>
                     </div>
                   </div>
-
-// These are the new ones
 
                   <div
                     style={{
