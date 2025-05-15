@@ -17,7 +17,7 @@ export default function Home() {
   };
 
   return (
-    <div>
+    <div style={{ width: "100vw" }}>
       {showMap && <Map key={key} />}
       <button
         onClick={forceRefresh}
