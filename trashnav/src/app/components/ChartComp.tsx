@@ -27,7 +27,7 @@ import {
 import { getReports } from "../../utils/db/getReports";
 
 type ChartData = {
-  area: string;
+  address: string;
   count: number;
 };
 
@@ -51,7 +51,7 @@ export default function ChartComp() {
       try {
         const data = await getReports();
         console.log(data);
-        // Initialize count with zero for each target area
+        // Initialize count with zero for each target address
         const areaCounts: Record<string, number> = {
           Papine: 0,
           Liguanea: 0,
@@ -59,16 +59,16 @@ export default function ChartComp() {
         };
 
         data!.forEach((item: any) => {
-          const area = item.area;
-          if (AREAS.includes(area)) {
-            areaCounts[area] += 1;
+          const address = item.address;
+          if (AREAS.includes(address)) {
+            areaCounts[address] += 1;
           }
         });
 
         // Format for chart
-        const formatted = AREAS.map((area) => ({
-          area,
-          count: areaCounts[area],
+        const formatted = AREAS.map((address) => ({
+          address,
+          count: areaCounts[address],
         }));
 
         setChartData(formatted);
@@ -97,7 +97,7 @@ export default function ChartComp() {
           >
             <CartesianGrid horizontal={false} />
             <YAxis
-              dataKey="area"
+              dataKey="address"
               type="category"
               tickLine={false}
               tickMargin={10}
@@ -111,7 +111,7 @@ export default function ChartComp() {
             />
             <Bar dataKey="count" fill="var(--color-count)" radius={4}>
               <LabelList
-                dataKey="area"
+                dataKey="address"
                 position="insideLeft"
                 offset={8}
                 className="fill-[--color-label]"
@@ -130,7 +130,7 @@ export default function ChartComp() {
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
-          Real-time area insights <TrendingUp className="h-4 w-4" />
+          Real-time address insights <TrendingUp className="h-4 w-4" />
         </div>
         <div className="leading-none text-muted-foreground">
           Filtered to 3 Kingston areas
