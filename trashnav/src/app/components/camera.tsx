@@ -107,7 +107,7 @@ const Camera: React.FC = () => {
           
           If no waste is visible, Just return a single word: 'Invalid'.
           
-          Amount should be a single word: 'Minimum', 'Medium', 'Maximum', or 'Invalid'.
+          Amount should be a an integer between 0 and 100: 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, or 'Invalid'.
           Do not include any other text or explanation.
           
           For wasteType, classify the waste into one of the following categories:
@@ -181,11 +181,11 @@ const Camera: React.FC = () => {
           var userID = await getUserId(userData?.email!);
 
           await createReport(
+            address,
             userID!,
             address,
             location.longitude,
             location.latitude,
-            json_data["wasteType"],
             json_data["Amount"]
           );
 
