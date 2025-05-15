@@ -42,6 +42,7 @@ export async function createReport(
 ) {
   try {
     const report: typeof Reports.$inferInsert = {
+      id:id,
       name: name,
       userId: userId,
       address: address,
