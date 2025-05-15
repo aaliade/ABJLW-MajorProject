@@ -13,7 +13,7 @@ export const Reports = pgTable("reports", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").references(() => Users.id).notNull(),
   name: text("name").notNull(),
-  area: text("address").notNull(),
+  address: text("address").notNull(),
   latitude: doublePrecision("latitude").notNull(),
   longitude: doublePrecision("longitude").notNull(),
   garbagelevel: integer("garbagelevel"),
