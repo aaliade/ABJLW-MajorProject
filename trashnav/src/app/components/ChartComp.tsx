@@ -27,7 +27,7 @@ import {
 import { getReports } from "../../utils/db/getReports";
 
 type ChartData = {
-  address: string;
+  area: string;
   count: number;
 };
 
@@ -59,16 +59,16 @@ export default function ChartComp() {
         };
 
         data!.forEach((item: any) => {
-          const address = item.address;
-          if (AREAS.includes(address)) {
-            areaCounts[address] += 1;
+          const area = item.area;
+          if (AREAS.includes(area)) {
+            areaCounts[area] += 1;
           }
         });
 
         // Format for chart
-        const formatted = AREAS.map((address) => ({
-          address,
-          count: areaCounts[address],
+        const formatted = AREAS.map((area) => ({
+          area,
+          count: areaCounts[area],
         }));
 
         setChartData(formatted);

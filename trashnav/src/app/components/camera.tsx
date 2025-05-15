@@ -144,7 +144,6 @@ const Camera: React.FC = () => {
         json_data["Amount"] == "Invalid"
       ) {
         console.log("Invalid image. Please try again.");
-        alert("Invalid image. Please try again.");
       } else {
         if (location) {
           var userEmail = await getUserById(userData?.email!);
@@ -210,17 +209,9 @@ const Camera: React.FC = () => {
             }),
           });
 
-        alert(
-            `Your waste report has been submitted.
-
-            Waste Type: ${json_data["wasteType"]}
-            Waste Level: ${json_data["Amount"]}%
-
-            You will receive a notification when it is picked up.
-
-            Thank you for your contribution to the environment!`
-        );
-          
+          alert(
+            "Your waste report has been submitted. You will receive a notification when it is picked up.\n\nThank you for your contribution to the environment!"
+          );
         }
       }
     } catch (error) {
