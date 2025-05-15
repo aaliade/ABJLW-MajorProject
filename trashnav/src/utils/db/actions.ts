@@ -33,22 +33,21 @@ export async function createUser(name: string, email: string) {
 
 // Create a new report
 export async function createReport(
+  name: string,
   userId: number,
   address: string,
   longitude: number,
   latitude: number,
-  wasteType: string,
-  amount: string,
+  garbagelevel: number,
 ) {
   try {
     const report: typeof Reports.$inferInsert = {
+      name: name,
       userId: userId,
       address: address,
       longitude: longitude,
       latitude: latitude,
-      wasteType: wasteType,
-      amount: amount,
-      createdAt: new Date(),
+      garbagelevel: garbagelevel,
     };
 
     await db.insert(Reports).values(report);
@@ -232,19 +231,6 @@ export async function getReportsByUserId(userId: number) {
     return reports;
   } catch (error) {
     console.log("Error reading reports for user: " + error);
-    return null;
-  }
-}
-
-export async function getReportsByStatus(status: string) {
-  try {
-    const reports = await db
-      .select()
-      .from(Reports)
-      .where(eq(Reports.status, status));
-    return reports;
-  } catch (error) {
-    console.log("Error reading reports by status: " + error);
     return null;
   }
 }
@@ -451,19 +437,6 @@ export async function updateUser(userId: number, name: string, email: string) {
   }
 }
 
-// Update report status
-export async function updateReportStatus(reportId: number, status: string) {
-  try {
-    await db
-      .update(Reports)
-      .set({ status: status })
-      .where(eq(Reports.id, reportId));
-    console.log("Report updated!");
-  } catch (error) {
-    console.log("Error updating report: " + error);
-  }
-}
-
 // Update report
 export async function updateReport(
   reportId: number,
@@ -471,10 +444,7 @@ export async function updateReport(
   address: string,
   latitude: number,
   longitude: number,
-  wasteType: string,
-  amount: string,
-  imageUrl: string,
-  verificationResult: string,
+  garbagelevel: number,
   status: string
 ) {
   try {
@@ -485,9 +455,7 @@ export async function updateReport(
         address: address,
         latitude: latitude,
         longitude: longitude,
-        wasteType: wasteType,
-        amount: amount,
-        status: status,
+        garbagelevel: garbagelevel,
       })
       .where(eq(Reports.id, reportId));
     console.log("Report updated!");
