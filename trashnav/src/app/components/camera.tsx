@@ -11,7 +11,11 @@ import {
   createReport,
 } from "@/utils/db/actions";
 
-const Camera: React.FC = () => {
+import { Session } from "next-auth";
+
+const Camera: React.FC<{ session: Session }> = ({ session }) => {
+  const [userData, setUserData] = useState(session.user);
+
   const [loading, setLoading] = useState(false);
   const webcamRef = useRef<Webcam>(null);
   const [location, setLocation] = useState<{
@@ -20,10 +24,6 @@ const Camera: React.FC = () => {
     accuracy: number;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [userData, setUserData] = useState<{
-    email: string;
-    name: string;
-  } | null>(null);
 
   // Video constraints to force back camera
   const videoConstraints = {
@@ -65,6 +65,8 @@ const Camera: React.FC = () => {
       const res = await fetch("/api/user");
       const data = await res.json();
       setUserData(data.user);
+
+      console.log(data.user);
     };
     fetchUserData();
   }, []);
@@ -143,7 +145,7 @@ const Camera: React.FC = () => {
         json_data["wasteType"] == "Invalid" &&
         json_data["Amount"] == "Invalid"
       ) {
-        console.log("Invalid image. Please try again.");
+        alert("Invalid image. Please try again.");
       } else {
         if (location) {
           var userEmail = await getUserById(userData?.email!);
@@ -176,7 +178,7 @@ const Camera: React.FC = () => {
               location.latitude,
               location.longitude
             )) ?? "";
-          console.log("Address:", address);
+          // console.log("Address:", address);
 
           var userID = await getUserId(userData?.email!);
 
@@ -188,8 +190,6 @@ const Camera: React.FC = () => {
             location.latitude,
             json_data["Amount"]
           );
-
-          console.log("HERE");
 
           await fetch("/api/send-email", {
             method: "POST",
@@ -210,7 +210,14 @@ const Camera: React.FC = () => {
           });
 
           alert(
-            "Your waste report has been submitted. You will receive a notification when it is picked up.\n\nThank you for your contribution to the environment!"
+            `Your waste report has been submitted.
+
+Waste Type: ${json_data["wasteType"]}
+Waste Level: ${json_data["Amount"]}%
+
+You will receive a notification when it is picked up.
+
+Thank you for your contribution to the environment!`
           );
         }
       }
