@@ -20,13 +20,14 @@ export default async function ReportPage() {
         <div className="lg:w-2/6 lg:pr-114 flex flex-col justify-center items-center">
           <UserCard user={session?.user} pagetype={"Server"} />
           <p className="text-base text-muted-foreground md:text-lg lg:text-xl mt-8 text-center">
-            Let’s clean up your space! Snap a quick photo of your garbage to help us plan the best pickup route.
+            Let’s clean up your space! Snap a quick photo of your garbage to
+            help us plan the best pickup route.
           </p>
         </div>
 
         {/* Camera Section */}
         <div className="lg:w-4/6 lg:pl-4">
-          <Camera />
+          <Camera session={session} />
         </div>
       </section>
 
