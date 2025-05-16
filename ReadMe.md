@@ -1,6 +1,6 @@
 # TRASHNAV 🗑️🚛
 
-### Optimizing garbage collection routes using user-generated data.
+### Optimizing garbage collection routes using user-generated data created by University of Technology Jamaica students as their final year project.
 
 
 ---
